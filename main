@@ -1,0 +1,47 @@
+###not complete
+
+import tweepy
+import re
+from twitterkeys import keys
+
+#from telegram.ext import Updater, MessageHandler, Filters
+#from google.cloud import language
+#from google.cloud.language import enums
+#from google.cloud.language import types
+from datetime import datetime, timedelta
+from nltk.tokenize import WordPunctTokenizer
+
+CONSUMER_KEY = keys['consumer_key']
+CONSUMER_SECRET = keys['consumer_secret']
+ACCESS_TOKEN = keys['access_token']
+ACCESS_TOKEN_SECRET = keys['access_token_secret']
+
+
+
+
+def authentication(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET):
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+    return api
+
+def search_tweets(keyword, total_tweets):
+    today_datetime = datetime.today().now()
+    yesterday_datetime = today_datetime - timedelta(hours=1)
+    today_date = today_datetime.strftime('%Y-%m-%d')
+    yesterday_date = yesterday_datetime.strftime('%Y-%m-%d')
+    api = authentication(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET)
+    search_result = tweepy.Cursor(api.search, 
+                                  q=keyword, 
+                                  since=yesterday_date, 
+                                  result_type='recent', 
+                                  lang='en').items(total_tweets)
+    return search_result
+
+for tweet in search_tweets(["#Ethereum","Bitcoin"],90):
+#    tweet.author.follow()
+#print(dir(tweet.author))
+    if tweet.author.followers_count > 5000:
+     tweet.author.follow()
+     print("Tweet: ",tweet.text)
+     print("Tweeted by: ",tweet.author.screen_name,tweet.author.followers_count)
